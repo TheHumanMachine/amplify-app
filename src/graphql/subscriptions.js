@@ -5,7 +5,9 @@ export const onCreateTodo = /* GraphQL */ `
   subscription OnCreateTodo {
     onCreateTodo {
       id
+      userid
       name
+      status
       description
       image
       createdAt
@@ -17,7 +19,9 @@ export const onUpdateTodo = /* GraphQL */ `
   subscription OnUpdateTodo {
     onUpdateTodo {
       id
+      userid
       name
+      status
       description
       image
       createdAt
@@ -29,7 +33,9 @@ export const onDeleteTodo = /* GraphQL */ `
   subscription OnDeleteTodo {
     onDeleteTodo {
       id
+      userid
       name
+      status
       description
       image
       createdAt

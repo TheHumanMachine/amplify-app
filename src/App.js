@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
 import { withAuthenticator, AmplifySignOut } from '@aws-amplify/ui-react';
-import { listTodos } from './graphql/queries';
-import { createTodo as createTodoMutation, deleteTodo as deleteTodoMutation } from './graphql/mutations';
+import { getTodosByUserid } from './graphql/queries';
+import { createTodo as createTodoMutation, deleteTodo as deleteTodoMutation, updateTodo as updateTodoMutation} from './graphql/mutations';
 import { API, Storage } from 'aws-amplify';
-
+import Todo from '../src/components/Todo/Todo'
 
 const initialFormState = { name: '', description: '' }
 
@@ -16,8 +16,9 @@ function App() {
     fetchTodos();
   }, []);
 
-  async function fetchTodos() {
-    const apiData = await API.graphql({ query: listTodos });
+  async function fetchTodos() { 
+    console.log(getTodosByUserid(getUserID()))
+    const apiData = await API.graphql({ query: getTodosByUserid(getUserID()) });
     const todoFromAPI = apiData.data.listTodos.items;
     await Promise.all(todoFromAPI.map(async todo => {
       if (todo.image) {
@@ -29,9 +30,14 @@ function App() {
     settodos(apiData.data.listTodos.items);
   }
 
+  async function updateTodo(updates) {
+    await API.graphql({ query: updateTodoMutation, variables: { input: updates }});
+  }
+
+
   async function createTodo() {
     if (!formData.name || !formData.description) return;
-    await API.graphql({ query: createTodoMutation, variables: { input: formData } });
+    await API.graphql({ query: createTodoMutation, variables: { input: {name:formData.name, userid: getUserID(), description:formData.description, status:false } }});
     if (formData.image) {
       const image = await Storage.get(formData.image);
       formData.image = image;
@@ -54,10 +60,27 @@ function App() {
     fetchTodos();
   }
 
+  function getUserEmail() {
+    var lastAuthUser = localStorage.getItem('CognitoIdentityServiceProvider.1295ff35fucfdcron8851jol7j.LastAuthUser');
+    var attri = JSON.parse(localStorage.getItem('CognitoIdentityServiceProvider.1295ff35fucfdcron8851jol7j.'+lastAuthUser + '.userData'));
+    for (var i = 0; i < attri['UserAttributes'].length; i++) {
+      if(attri['UserAttributes'][i]['Name'] === 'email')
+        return attri['UserAttributes'][i]['Value'];
+    }
+    return 'None'
+  }
+
+  function getUserID() {
+    var lastAuthUser = localStorage.getItem('CognitoIdentityServiceProvider.1295ff35fucfdcron8851jol7j.LastAuthUser');
+    var attri = JSON.parse(localStorage.getItem('CognitoIdentityServiceProvider.1295ff35fucfdcron8851jol7j.'+lastAuthUser + '.userData'));
+    return attri['Username']
+  }
+
 
   return (
     <div className="App">
       <h1>My todos App</h1>
+      <p>{getUserEmail()}</p>
       <input
         onChange={e => setFormData({ ...formData, 'name': e.target.value})}
         placeholder="todo name"
@@ -75,16 +98,7 @@ function App() {
       <button onClick={createTodo}>Create todo</button>
       <div style={{marginBottom: 30}}>
       {
-        todos.map(todo => (
-          <div key={todo.id || todo.name}>
-            <h2>{todo.name}</h2>
-            <p>{todo.description}</p>
-            <button onClick={() => deleteTodo(todo)}>Delete todo</button>
-            {
-              todo.image && <img src={todo.image} style={{width: 400}} />
-            }
-          </div>
-        ))
+        todos.map(todo => (Todo(todo, deleteTodo, updateTodo)))
       }
       </div>
       <AmplifySignOut />

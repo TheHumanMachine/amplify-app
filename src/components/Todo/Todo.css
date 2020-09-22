@@ -1,0 +1,35 @@
+.Todo{
+    width:60%;
+    margin:16px auto;
+    border:1px solid #eee;
+    box-shadow: 0 2px 3px #ccc;
+    padding: 8px;
+    text-align: center;
+    position: relative;
+}
+
+.Todo-header{
+    text-align: left;
+    color: chocolate;
+    position: absolute;
+    top: 0%;
+}
+
+.Todo-description{
+    text-align: center;
+    color: blueviolet;
+}
+
+.Todo-delete-button-container{
+    margin: 0;
+    position: absolute;
+    top: 50%;
+    right: 0%;
+    -ms-transform: translateY(-50%);
+    transform: translateY(-50%);
+}
+
+.Todo-delete-button{
+    padding: 0px;
+
+}

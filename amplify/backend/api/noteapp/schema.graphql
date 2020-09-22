@@ -1,6 +1,9 @@
-type Todo @model {
+type Todo @model
+  @key(name: "todosByUserid", fields: ["userid"], queryField: "todosByUserid") {
   id: ID!
+  userid: String!
   name: String!
+  status: Boolean!
   description: String
   image: String
 }
